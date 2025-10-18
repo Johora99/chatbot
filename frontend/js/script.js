@@ -2,6 +2,7 @@
 const input = document.querySelector('#text');
 const chatContainer = document.querySelector('#chat-container')
 const btn = document.querySelector('#btn')
+const Id = Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
 input.addEventListener('keyup', handleEvent);
 btn.addEventListener('click', handleClick);
 
@@ -20,6 +21,7 @@ msg.textContent = text;
 chatContainer?.appendChild(msg)
 input.value = ''
 chatContainer.appendChild(loading);
+window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 const assistant = await callServer(text);
 console.log(assistant)
 const assistantMsg = document.createElement('div');
@@ -27,6 +29,7 @@ assistantMsg.className = `max-w-fit my-5 lg:my-10`;
 assistantMsg.textContent = assistant;
 loading.remove();
 chatContainer?.appendChild(assistantMsg)
+window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
 
@@ -36,7 +39,7 @@ async function callServer(text){
     headers: {
       'content-type': 'application/json'
     },
-    body: JSON.stringify({message: text})
+    body: JSON.stringify({Id, message: text})
   })
 if (!response.ok) {
   const errorMsg = document.createElement('div');

@@ -1,14 +1,14 @@
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import {tavily} from "@tavily/core"
+import NodeCache from "node-cache";
 dotenv.config(); 
 const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
-console.log(process.env.TAVILY_API_KEY)
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const myCache = new NodeCache({stdTTL: 86400});
 
-
-export async function generate(userMessage){
-const messages = [
+export async function generate(userMessage, Id){
+const baseMessages = [
   {
     role: 'system',
     content: `You are Nova, an intelligent and polite personal assistant. 
@@ -21,7 +21,7 @@ Don't mention the tool unless needed
 Current date and time: ${new Date().toUTCString()}`
   },
 ];
-
+const messages = myCache.get(Id) ?? baseMessages;
  messages.push({
   role: 'user',
   content: userMessage,
@@ -57,6 +57,7 @@ const completion = await groq.chat.completions.create({
   messages.push(completion.choices[0].message)
  const tollCalls = completion.choices[0].message.tool_calls;
  if(!tollCalls){
+  myCache.set(Id, messages)
   return completion.choices[0].message.content;
  }
 for(let tool of tollCalls){
